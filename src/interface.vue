@@ -76,7 +76,7 @@ const props = defineProps({
 	},
 	cityField: {
 		type: String,
-		default: 'city',
+		default: null,
 	},
 	markerDraggable: {
 		type: Boolean,

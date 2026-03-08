@@ -109,10 +109,7 @@ export default defineInterface({
 			meta: {
 				interface: 'input',
 				width: 'half',
-				note: 'Field key in this collection that should receive city/locality (default: city).',
-			},
-			schema: {
-				default_value: 'city',
+				note: 'Optional. Field key in this collection that should receive city/locality.',
 			},
 		},
 	],

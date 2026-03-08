@@ -92,9 +92,10 @@ Use `Latitude field key` and `Longitude field key` to write coordinates into oth
 These fields are updated when an address is selected and also when the marker is dragged.
 
 ### Populate City Field
-Use `City field key` to write the detected city/locality into another field in the same item (default: `city`).
+Use `City field key` to write the detected city/locality into another field in the same item.
 City is extracted from address components with this fallback order:
 `locality` -> `postal_town` -> `administrative_area_level_3` -> `administrative_area_level_2`.
+If `City field key` is empty, city sync is disabled.
 
 ## Admin Setup
 1. Create a JSON field for the GeoJSON output (this is the field that uses this interface).
