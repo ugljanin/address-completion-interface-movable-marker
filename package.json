@@ -1,21 +1,25 @@
 {
-	"name": "@directus-labs/address-completion-interface",
+	"name": "@ugljanin/address-completion-interface",
 	"type": "module",
-	"version": "1.0.1",
-	"description": "Use Google Places autocomplete Data API as an Address Completion interface",
-	"author": "Directus Labs",
+	"version": "1.0.1-fork.1",
+	"description": "Fork of Directus Labs Address Completion interface with lat/lng field sync",
+	"author": "ugljanin",
 	"contributors": [
 		{
-			"name": "Dominic Marcelino",
-			"email": "dominic.marcelino@utomic.media"
+			"name": "Directus Labs",
+			"url": "https://github.com/directus-labs/extensions/tree/main/packages/address-completion-interface"
 		}
 	],
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus-labs/extensions.git",
-		"directory": "packages/address-completion-interface"
+		"url": "https://github.com/ugljanin/address-completion-interface-movable-marker.git"
 	},
+	"bugs": {
+		"url": "https://github.com/ugljanin/address-completion-interface-movable-marker/issues"
+	},
+	"homepage": "https://github.com/ugljanin/address-completion-interface-movable-marker#readme",
+	"private": true,
 	"keywords": [
 		"directus",
 		"directus-extension",
