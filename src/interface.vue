@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PropType, Ref } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
-import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
+import { inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import googleLogoDark from './assets/images/google_on_non_white_hdpi.png';
 import googleLogo from './assets/images/google_on_white_hdpi.png';
@@ -416,22 +416,36 @@ function onMarkerDragEnd() {
 	setCoordinateFields(coordinates[1], coordinates[0]);
 }
 
-function setCoordinateFields(lat: number, lng: number) {
+async function setCoordinateFields(lat: number, lng: number) {
+	const updates: Array<[field: string, value: number | null]> = [];
+
 	if (props.latField) {
-		setItemFieldValue(props.latField, lat);
+		updates.push([props.latField, lat]);
 	}
 
 	if (props.lngField) {
-		setItemFieldValue(props.lngField, lng);
+		updates.push([props.lngField, lng]);
+	}
+
+	if (updates.length === 0) {
+		return;
+	}
+
+	// Keep local form state in sync first so both values exist before event handlers run.
+	if (values?.value) {
+		for (const [field, value] of updates) {
+			values.value[field] = value;
+		}
+	}
+
+	// Emit sequentially across ticks to avoid dropping the first sibling field update.
+	for (const [field, value] of updates) {
+		emitFieldValue(field, value);
+		await nextTick();
 	}
 }
 
-function setItemFieldValue(field: string, value: number | null) {
-	// Keep local form state in sync even when Directus version/event signature differs.
-	if (values?.value) {
-		values.value[field] = value;
-	}
-
+function emitFieldValue(field: string, value: number | null) {
 	emit('setFieldValue', field, value);
 	emit('setFieldValue', { field, value });
 	emit('set-field-value', { field, value });
