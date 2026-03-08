@@ -78,6 +78,10 @@ const props = defineProps({
 		type: String,
 		default: null,
 	},
+	addressField: {
+		type: String,
+		default: null,
+	},
 	markerDraggable: {
 		type: Boolean,
 		default: false,
@@ -108,6 +112,7 @@ const mapType = ref<MapType>('roadmap');
 const controlsReady = ref(false);
 const values = inject<Ref<Record<string, unknown>> | null>('values', null);
 const selectedCity = ref<string | null>(null);
+const selectedAddress = ref<string | null>(null);
 
 const isDark = document.body.classList.contains('dark');
 const lang = getCurrentLanguage();
@@ -155,11 +160,13 @@ watch(() => props.value, (newValue) => {
 
 		searchInput.value = null;
 		selectedCity.value = null;
+		selectedAddress.value = null;
 
 		return;
 	}
 
 	selectedCity.value = newValue.properties?.city ?? null;
+	selectedAddress.value = newValue.properties?.formated ?? null;
 	setMapValue();
 });
 
@@ -229,19 +236,20 @@ async function onPlaceSelected(location: AutocompleteLocation) {
 		const location = new google.maps.LatLng(lat, lng);
 		setMapLocation(location, placeData.place.viewport);
 
-			const geoData: GeoJsonFeature = {
-				geometry: {
-					coordinates: [lng, lat],
-					type: 'Point',
-				},
-				properties: getProperties(placeData.place),
-				type: 'Feature',
-			};
+		const geoData: GeoJsonFeature = {
+			geometry: {
+				coordinates: [lng, lat],
+				type: 'Point',
+			},
+			properties: getProperties(placeData.place),
+			type: 'Feature',
+		};
 
-			selectedCity.value = geoData.properties.city ?? null;
-			emit('input', geoData);
-			setMappedFields(lat, lng, geoData.properties.city ?? null);
-		}
+		selectedCity.value = geoData.properties.city ?? null;
+		selectedAddress.value = geoData.properties.formated ?? null;
+		emit('input', geoData);
+		setMappedFields(lat, lng, geoData.properties.city ?? null, geoData.properties.formated ?? null);
+	}
 
 	setNewSessionToken();
 }
@@ -430,10 +438,16 @@ function onMarkerDragEnd() {
 	const properties = { ...(props.value?.properties ?? {}) } as Partial<GeoProperties>;
 	delete properties.viewport;
 	const city = properties.city ?? selectedCity.value ?? null;
+	const address = properties.formated ?? selectedAddress.value ?? null;
 
 	if (city) {
 		properties.city = city;
 		selectedCity.value = city;
+	}
+
+	if (address) {
+		properties.formated = address;
+		selectedAddress.value = address;
 	}
 
 	emit('input', {
@@ -445,10 +459,10 @@ function onMarkerDragEnd() {
 		type: 'Feature',
 	});
 
-	setMappedFields(coordinates[1], coordinates[0], city);
+	setMappedFields(coordinates[1], coordinates[0], city, address);
 }
 
-async function setMappedFields(lat: number, lng: number, city: string | null) {
+async function setMappedFields(lat: number, lng: number, city: string | null, address: string | null) {
 	const updates: Array<[field: string, value: MappedFieldValue]> = [];
 
 	if (props.latField) {
@@ -461,6 +475,10 @@ async function setMappedFields(lat: number, lng: number, city: string | null) {
 
 	if (props.cityField) {
 		updates.push([props.cityField, city]);
+	}
+
+	if (props.addressField) {
+		updates.push([props.addressField, address]);
 	}
 
 	if (updates.length === 0) {

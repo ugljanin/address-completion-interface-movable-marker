@@ -112,6 +112,16 @@ export default defineInterface({
 				note: 'Optional. Field key in this collection that should receive city/locality.',
 			},
 		},
+		{
+			field: 'addressField',
+			name: 'Address field key',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				note: 'Optional. Field key in this collection that should receive the formatted address.',
+			},
+		},
 	],
 	types: ['json'],
 });
