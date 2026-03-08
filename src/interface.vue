@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { PropType } from 'vue';
+import type { PropType, Ref } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import googleLogoDark from './assets/images/google_on_non_white_hdpi.png';
 import googleLogo from './assets/images/google_on_white_hdpi.png';
@@ -81,7 +81,8 @@ const props = defineProps({
 
 const emit = defineEmits<{
 	input: [GeoJsonFeature | null];
-	setFieldValue: [field: string, value: number | null];
+	setFieldValue: [field: string, value: number | null] | [payload: { field: string; value: number | null }];
+	'set-field-value': [payload: { field: string; value: number | null }];
 }>();
 
 const { t } = useI18n();
@@ -98,6 +99,7 @@ const hasMounted = ref(false);
 const isFullscreen = ref(false);
 const mapType = ref<MapType>('roadmap');
 const controlsReady = ref(false);
+const values = inject<Ref<Record<string, unknown>> | null>('values', null);
 
 const isDark = document.body.classList.contains('dark');
 const lang = getCurrentLanguage();
@@ -416,12 +418,23 @@ function onMarkerDragEnd() {
 
 function setCoordinateFields(lat: number, lng: number) {
 	if (props.latField) {
-		emit('setFieldValue', props.latField, lat);
+		setItemFieldValue(props.latField, lat);
 	}
 
 	if (props.lngField) {
-		emit('setFieldValue', props.lngField, lng);
+		setItemFieldValue(props.lngField, lng);
 	}
+}
+
+function setItemFieldValue(field: string, value: number | null) {
+	// Keep local form state in sync even when Directus version/event signature differs.
+	if (values?.value) {
+		values.value[field] = value;
+	}
+
+	emit('setFieldValue', field, value);
+	emit('setFieldValue', { field, value });
+	emit('set-field-value', { field, value });
 }
 
 function getCoordinatesFromMarkerPosition(position: google.maps.LatLng | google.maps.LatLngLiteral): Coordinates | null {
