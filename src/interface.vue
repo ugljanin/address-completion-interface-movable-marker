@@ -20,6 +20,7 @@ interface GeoProperties {
 	country: string; // ISO 3166-2
 	administrativeArea: string;
 	postalCode: string;
+	city: string;
 	formated: string;
 	raw: google.maps.places.AddressComponent[];
 	viewport: google.maps.LatLngBounds;
@@ -73,16 +74,22 @@ const props = defineProps({
 		type: String,
 		default: 'lng',
 	},
+	cityField: {
+		type: String,
+		default: 'city',
+	},
 	markerDraggable: {
 		type: Boolean,
 		default: false,
 	},
 });
 
+type MappedFieldValue = string | number | null;
+
 const emit = defineEmits<{
 	input: [GeoJsonFeature | null];
-	setFieldValue: [field: string, value: number | null] | [payload: { field: string; value: number | null }];
-	'set-field-value': [payload: { field: string; value: number | null }];
+	setFieldValue: [field: string, value: MappedFieldValue] | [payload: { field: string; value: MappedFieldValue }];
+	'set-field-value': [payload: { field: string; value: MappedFieldValue }];
 }>();
 
 const { t } = useI18n();
@@ -219,18 +226,18 @@ async function onPlaceSelected(location: AutocompleteLocation) {
 		const location = new google.maps.LatLng(lat, lng);
 		setMapLocation(location, placeData.place.viewport);
 
-		const geoData: GeoJsonFeature = {
-			geometry: {
-				coordinates: [lng, lat],
-				type: 'Point',
-			},
-			properties: getProperties(placeData.place),
-			type: 'Feature',
-		};
+			const geoData: GeoJsonFeature = {
+				geometry: {
+					coordinates: [lng, lat],
+					type: 'Point',
+				},
+				properties: getProperties(placeData.place),
+				type: 'Feature',
+			};
 
-		emit('input', geoData);
-		setCoordinateFields(lat, lng);
-	}
+			emit('input', geoData);
+			setMappedFields(lat, lng, geoData.properties.city ?? null);
+		}
 
 	setNewSessionToken();
 }
@@ -242,12 +249,14 @@ function getProperties(place: google.maps.places.Place): GeoProperties {
 		const country = getadressComponent(place.addressComponents, 'country', 'shortText');
 		const postalCode = getadressComponent(place.addressComponents, 'postal_code', 'longText');
 		const administrativeArea = getadressComponent(place.addressComponents, 'administrative_area_level_1', 'longText');
+		const city = getCity(place.addressComponents);
 
 		properties = {
 			...properties,
 			...(country && { country }),
 			...(postalCode && { postalCode }),
 			...(administrativeArea && { administrativeArea }),
+			...(city && { city }),
 		};
 
 		properties.raw = place.addressComponents;
@@ -268,7 +277,7 @@ function getProperties(place: google.maps.places.Place): GeoProperties {
 	return properties;
 }
 
-function getadressComponent(addressComponents: google.maps.places.Place['addressComponents'], type: string, valueKey: string) {
+function getadressComponent(addressComponents: google.maps.places.Place['addressComponents'], type: string, valueKey: 'longText' | 'shortText') {
 	if (!addressComponents) {
 		return;
 	}
@@ -277,9 +286,22 @@ function getadressComponent(addressComponents: google.maps.places.Place['address
 		return address_component.types.includes(type);
 	});
 
-	if (component && component[0] && component[0][valueKey]) {
+	if (component && component[0]) {
 		return component[0][valueKey];
 	}
+}
+
+function getCity(addressComponents: google.maps.places.Place['addressComponents']) {
+	if (!addressComponents) {
+		return;
+	}
+
+	return (
+		getadressComponent(addressComponents, 'locality', 'longText')
+		?? getadressComponent(addressComponents, 'postal_town', 'longText')
+		?? getadressComponent(addressComponents, 'administrative_area_level_3', 'longText')
+		?? getadressComponent(addressComponents, 'administrative_area_level_2', 'longText')
+	);
 }
 
 function initMap() {
@@ -413,11 +435,11 @@ function onMarkerDragEnd() {
 		type: 'Feature',
 	});
 
-	setCoordinateFields(coordinates[1], coordinates[0]);
+	setMappedFields(coordinates[1], coordinates[0], props.value?.properties?.city ?? null);
 }
 
-async function setCoordinateFields(lat: number, lng: number) {
-	const updates: Array<[field: string, value: number | null]> = [];
+async function setMappedFields(lat: number, lng: number, city: string | null) {
+	const updates: Array<[field: string, value: MappedFieldValue]> = [];
 
 	if (props.latField) {
 		updates.push([props.latField, lat]);
@@ -425,6 +447,10 @@ async function setCoordinateFields(lat: number, lng: number) {
 
 	if (props.lngField) {
 		updates.push([props.lngField, lng]);
+	}
+
+	if (props.cityField) {
+		updates.push([props.cityField, city]);
 	}
 
 	if (updates.length === 0) {
@@ -445,7 +471,7 @@ async function setCoordinateFields(lat: number, lng: number) {
 	}
 }
 
-function emitFieldValue(field: string, value: number | null) {
+function emitFieldValue(field: string, value: MappedFieldValue) {
 	emit('setFieldValue', field, value);
 	emit('setFieldValue', { field, value });
 	emit('set-field-value', { field, value });

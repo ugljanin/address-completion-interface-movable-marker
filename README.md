@@ -91,24 +91,33 @@ Enable `Enable marker dragging` in the interface settings to allow users to repo
 Use `Latitude field key` and `Longitude field key` to write coordinates into other fields in the same item (defaults are `lat` and `lng`).
 These fields are updated when an address is selected and also when the marker is dragged.
 
+### Populate City Field
+Use `City field key` to write the detected city/locality into another field in the same item (default: `city`).
+City is extracted from address components with this fallback order:
+`locality` -> `postal_town` -> `administrative_area_level_3` -> `administrative_area_level_2`.
+
 ## Admin Setup
 1. Create a JSON field for the GeoJSON output (this is the field that uses this interface).
-2. Create numeric fields for coordinates (for example `lat` and `lng`).
+2. Create numeric fields for coordinates (for example `lat` and `lng`) and a text field for city (for example `city`).
 3. In the JSON field interface settings:
    - Set `Google Maps API Key`
    - Optionally configure `Autocomplete Fetch Options`
    - Set `Latitude field key` to your latitude field key (example: `lat`)
    - Set `Longitude field key` to your longitude field key (example: `lng`)
+   - Set `City field key` to your city field key (example: `city`)
    - Optionally enable `Enable marker dragging`
 4. Save an item by selecting an address or dragging the marker.
 
 On save/input updates:
 - The GeoJSON field is updated with full geometry/properties.
 - The configured latitude/longitude fields are updated with coordinates.
+- The configured city field is updated from place address components.
 
 ## Changes In This Fork
 - Added support for writing coordinates into separate item fields (`lat` / `lng` by default).
+- Added support for writing city/locality into a separate item field (`city` by default).
 - Added interface settings for mapping target coordinate field keys.
+- Added interface setting for mapping the target city field key.
 - Added marker-drag coordinate sync for those fields.
 
 ### Support

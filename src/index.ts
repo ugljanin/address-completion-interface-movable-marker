@@ -102,6 +102,19 @@ export default defineInterface({
 				default_value: 'lng',
 			},
 		},
+		{
+			field: 'cityField',
+			name: 'City field key',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				note: 'Field key in this collection that should receive city/locality (default: city).',
+			},
+			schema: {
+				default_value: 'city',
+			},
+		},
 	],
 	types: ['json'],
 });
