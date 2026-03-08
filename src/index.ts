@@ -76,6 +76,32 @@ export default defineInterface({
 				note: 'Check the [documentation](https://developers.google.com/maps/documentation/javascript/reference/autocomplete-data#AutocompleteSuggestion.fetchAutocompleteSuggestions) for possible options',
 			},
 		},
+		{
+			field: 'latField',
+			name: 'Latitude field key',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				note: 'Field key in this collection that should receive latitude (default: lat).',
+			},
+			schema: {
+				default_value: 'lat',
+			},
+		},
+		{
+			field: 'lngField',
+			name: 'Longitude field key',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				note: 'Field key in this collection that should receive longitude (default: lng).',
+			},
+			schema: {
+				default_value: 'lng',
+			},
+		},
 	],
 	types: ['json'],
 });

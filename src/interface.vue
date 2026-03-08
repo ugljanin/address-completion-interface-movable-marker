@@ -65,6 +65,14 @@ const props = defineProps({
 		type: Object,
 		default: () => ({}),
 	},
+	latField: {
+		type: String,
+		default: 'lat',
+	},
+	lngField: {
+		type: String,
+		default: 'lng',
+	},
 	markerDraggable: {
 		type: Boolean,
 		default: false,
@@ -73,6 +81,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
 	input: [GeoJsonFeature | null];
+	setFieldValue: [field: string, value: number | null];
 }>();
 
 const { t } = useI18n();
@@ -218,6 +227,7 @@ async function onPlaceSelected(location: AutocompleteLocation) {
 		};
 
 		emit('input', geoData);
+		setCoordinateFields(lat, lng);
 	}
 
 	setNewSessionToken();
@@ -400,6 +410,18 @@ function onMarkerDragEnd() {
 		properties,
 		type: 'Feature',
 	});
+
+	setCoordinateFields(coordinates[1], coordinates[0]);
+}
+
+function setCoordinateFields(lat: number, lng: number) {
+	if (props.latField) {
+		emit('setFieldValue', props.latField, lat);
+	}
+
+	if (props.lngField) {
+		emit('setFieldValue', props.lngField, lng);
+	}
 }
 
 function getCoordinatesFromMarkerPosition(position: google.maps.LatLng | google.maps.LatLngLiteral): Coordinates | null {

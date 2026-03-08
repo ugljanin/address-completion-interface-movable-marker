@@ -57,5 +57,9 @@ This example restricts autocomplete results to US addresses only.
 ### Marker Dragging
 Enable `Enable marker dragging` in the interface settings to allow users to reposition the marker manually after selecting an address. Disable it to keep marker placement fixed.
 
+### Populate Latitude/Longitude Fields
+Use `Latitude field key` and `Longitude field key` to write coordinates into other fields in the same item (defaults are `lat` and `lng`).
+These fields are updated when an address is selected and also when the marker is dragged.
+
 ### Support
 For issues and feature requests, please use the GitHub issues section of this repository.
