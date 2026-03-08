@@ -107,6 +107,7 @@ const isFullscreen = ref(false);
 const mapType = ref<MapType>('roadmap');
 const controlsReady = ref(false);
 const values = inject<Ref<Record<string, unknown>> | null>('values', null);
+const selectedCity = ref<string | null>(null);
 
 const isDark = document.body.classList.contains('dark');
 const lang = getCurrentLanguage();
@@ -153,10 +154,12 @@ watch(() => props.value, (newValue) => {
 		}
 
 		searchInput.value = null;
+		selectedCity.value = null;
 
 		return;
 	}
 
+	selectedCity.value = newValue.properties?.city ?? null;
 	setMapValue();
 });
 
@@ -235,6 +238,7 @@ async function onPlaceSelected(location: AutocompleteLocation) {
 				type: 'Feature',
 			};
 
+			selectedCity.value = geoData.properties.city ?? null;
 			emit('input', geoData);
 			setMappedFields(lat, lng, geoData.properties.city ?? null);
 		}
@@ -423,8 +427,14 @@ function onMarkerDragEnd() {
 		return;
 	}
 
-	const properties = { ...(props.value?.properties ?? {}) };
+	const properties = { ...(props.value?.properties ?? {}) } as Partial<GeoProperties>;
 	delete properties.viewport;
+	const city = properties.city ?? selectedCity.value ?? null;
+
+	if (city) {
+		properties.city = city;
+		selectedCity.value = city;
+	}
 
 	emit('input', {
 		geometry: {
@@ -435,7 +445,7 @@ function onMarkerDragEnd() {
 		type: 'Feature',
 	});
 
-	setMappedFields(coordinates[1], coordinates[0], props.value?.properties?.city ?? null);
+	setMappedFields(coordinates[1], coordinates[0], city);
 }
 
 async function setMappedFields(lat: number, lng: number, city: string | null) {
