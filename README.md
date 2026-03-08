@@ -98,7 +98,7 @@ City is extracted from address components with this fallback order:
 If `City field key` is empty, city sync is disabled.
 
 ### Populate Address Field
-Use `Address field key` to write the formatted address into another field in the same item.
+Use `Address field key` to write street name (`route`) into another field in the same item.
 If `Address field key` is empty, address sync is disabled.
 
 ## Admin Setup
@@ -118,12 +118,12 @@ On save/input updates:
 - The GeoJSON field is updated with full geometry/properties.
 - The configured latitude/longitude fields are updated with coordinates.
 - The configured city field is updated from place address components.
-- The configured address field is updated from the formatted address.
+- The configured address field is updated from street name (`route`).
 
 ## Changes In This Fork
 - Added support for writing coordinates into separate item fields (`lat` / `lng` by default).
 - Added support for writing city/locality into a separate item field (`city` by default).
-- Added support for writing formatted address into a separate item field.
+- Added support for writing street name (`route`) into a separate item field.
 - Added interface settings for mapping target coordinate field keys.
 - Added interface setting for mapping the target city field key.
 - Added interface setting for mapping the target address field key.

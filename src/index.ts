@@ -119,7 +119,7 @@ export default defineInterface({
 			meta: {
 				interface: 'input',
 				width: 'half',
-				note: 'Optional. Field key in this collection that should receive the formatted address.',
+				note: 'Optional. Field key in this collection that should receive street name (route).',
 			},
 		},
 	],

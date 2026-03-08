@@ -21,6 +21,7 @@ interface GeoProperties {
 	administrativeArea: string;
 	postalCode: string;
 	city: string;
+	street: string;
 	formated: string;
 	raw: google.maps.places.AddressComponent[];
 	viewport: google.maps.LatLngBounds;
@@ -166,7 +167,7 @@ watch(() => props.value, (newValue) => {
 	}
 
 	selectedCity.value = newValue.properties?.city ?? null;
-	selectedAddress.value = newValue.properties?.formated ?? null;
+	selectedAddress.value = newValue.properties?.street ?? newValue.properties?.formated ?? null;
 	setMapValue();
 });
 
@@ -245,11 +246,11 @@ async function onPlaceSelected(location: AutocompleteLocation) {
 			type: 'Feature',
 		};
 
-		selectedCity.value = geoData.properties.city ?? null;
-		selectedAddress.value = geoData.properties.formated ?? null;
-		emit('input', geoData);
-		setMappedFields(lat, lng, geoData.properties.city ?? null, geoData.properties.formated ?? null);
-	}
+			selectedCity.value = geoData.properties.city ?? null;
+			selectedAddress.value = geoData.properties.street ?? geoData.properties.formated ?? null;
+			emit('input', geoData);
+			setMappedFields(lat, lng, geoData.properties.city ?? null, geoData.properties.street ?? null);
+		}
 
 	setNewSessionToken();
 }
@@ -262,6 +263,7 @@ function getProperties(place: google.maps.places.Place): GeoProperties {
 		const postalCode = getadressComponent(place.addressComponents, 'postal_code', 'longText');
 		const administrativeArea = getadressComponent(place.addressComponents, 'administrative_area_level_1', 'longText');
 		const city = getCity(place.addressComponents);
+		const street = getStreet(place.addressComponents);
 
 		properties = {
 			...properties,
@@ -269,6 +271,7 @@ function getProperties(place: google.maps.places.Place): GeoProperties {
 			...(postalCode && { postalCode }),
 			...(administrativeArea && { administrativeArea }),
 			...(city && { city }),
+			...(street && { street }),
 		};
 
 		properties.raw = place.addressComponents;
@@ -314,6 +317,14 @@ function getCity(addressComponents: google.maps.places.Place['addressComponents'
 		?? getadressComponent(addressComponents, 'administrative_area_level_3', 'longText')
 		?? getadressComponent(addressComponents, 'administrative_area_level_2', 'longText')
 	);
+}
+
+function getStreet(addressComponents: google.maps.places.Place['addressComponents']) {
+	if (!addressComponents) {
+		return;
+	}
+
+	return getadressComponent(addressComponents, 'route', 'longText');
 }
 
 function initMap() {
@@ -438,7 +449,7 @@ function onMarkerDragEnd() {
 	const properties = { ...(props.value?.properties ?? {}) } as Partial<GeoProperties>;
 	delete properties.viewport;
 	const city = properties.city ?? selectedCity.value ?? null;
-	const address = properties.formated ?? selectedAddress.value ?? null;
+	const address = properties.street ?? selectedAddress.value ?? null;
 
 	if (city) {
 		properties.city = city;
@@ -446,7 +457,7 @@ function onMarkerDragEnd() {
 	}
 
 	if (address) {
-		properties.formated = address;
+		properties.street = address;
 		selectedAddress.value = address;
 	}
 
