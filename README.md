@@ -25,8 +25,8 @@ You can install this fork directly into your Directus project `extensions` folde
 
 ```bash
 cd /path/to/your/directus/extensions
-git clone <your-fork-repo-url> address-completion-interface
-cd address-completion-interface
+git clone <your-fork-repo-url> address-completion-interface-movable-marker
+cd address-completion-interface-movable-marker
 npm install
 npm run build
 ```
